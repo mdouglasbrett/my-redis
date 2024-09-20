@@ -7,7 +7,7 @@ async fn main() -> Result<()> {
 
     let result = client.get("hello").await?;
 
-    println!("git value from server; result={:?}", result);
+    println!("got value from server; result={:?}", result);
 
     Ok(())
 }
