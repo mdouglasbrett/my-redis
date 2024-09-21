@@ -19,7 +19,8 @@ async fn main() -> io::Result<()> {
                     Ok(n) => {
                         println!("GOT {:?}", &buf[..n]);
                         // @mdouglasbrett - normally I would attempt to check
-                        // the other way around, I assume this is more idiomatic
+                        // the other way around (for the Ok), I assume this is 
+                        // more idiomatic
                         if socket.write_all(&buf[..n]).await.is_err() {
                             return;
                         }
