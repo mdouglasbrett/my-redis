@@ -1,8 +1,8 @@
 use bytes::{Buf, BytesMut};
 use mini_redis::frame::Error::Incomplete;
 use mini_redis::{Frame, Result};
-use std::io::Cursor;
-use tokio::io::{self, AsyncReadExt, AsyncWriteExt, BufWriter};
+use std::io::{self, Cursor};
+use tokio::io::{AsyncReadExt, AsyncWriteExt, BufWriter};
 use tokio::net::TcpStream;
 
 pub struct Connection {
@@ -70,15 +70,17 @@ impl Connection {
             },
             Frame::Integer(val) => {
                 self.stream.write_u8(b':').await?;
-                // @mdouglasbrett - TODO: the compiler does not like this
-                self.write_decimal(*val).await?;
+                // @mdouglasbrett - in the tutorial we don't get into 
+                // implementing write_decimal. It is in the repo though
+                // so adding it below for reference.
+                // self.write_decimal(*val).await?;
             },
             Frame::Bulk(val) => {
                 let len = val.len();
 
                 self.stream.write_u8(b'$').await?;
-                // @mdouglasbrett - TODO: the compiler does not like this
-                self.write_decimal(len as u64).await?;
+                // @mdouglasbrett - see above
+                // self.write_decimal(len as u64).await?;
                 self.stream.write_all(val).await?;
                 self.stream.write_all(b"\r\n").await?;
                 
@@ -89,8 +91,23 @@ impl Connection {
             Frame::Array(_val) => unimplemented!(),
         }
 
-        self.stream.flush().await;
+        self.stream.flush().await?;
 
         Ok(())
     }
+
+    // async fn write_decimal(&mut self, val: u64) -> io::Result<()> {
+    //     use std::io::Write;
+
+    //     // Convert the value to a string
+    //     let mut buf = [0u8; 12];
+    //     let mut buf = Cursor::new(&mut buf[..]);
+    //     write!(&mut buf, "{}", val)?;
+
+    //     let pos = buf.position() as usize;
+    //     self.stream.write_all(&buf.get_ref()[..pos]).await?;
+    //     self.stream.write_all(b"\r\n").await?;
+
+    //     Ok(())
+    // }
 }
